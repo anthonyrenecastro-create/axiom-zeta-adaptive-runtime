@@ -1,0 +1,6 @@
+{
+  "name": "HRM AI Ecosystem Ecology",
+  "description": "Resilient AI Ecosystem World-Model Substrate and Interactive Runtime",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

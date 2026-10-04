@@ -1,0 +1,19 @@
+test_antiwindup_and_no_setpoint_derivative_kick (test_runtime.ControlTests.test_antiwindup_and_no_setpoint_derivative_kick) ... ok
+test_command_expiry_replay_and_limits (test_runtime.ControlTests.test_command_expiry_replay_and_limits) ... ok
+test_drift_breaker_latches_and_device_isolation (test_runtime.ControlTests.test_drift_breaker_latches_and_device_isolation) ... ok
+test_raw_temperature_and_stale_telemetry_block (test_runtime.ControlTests.test_raw_temperature_and_stale_telemetry_block) ... ok
+test_seeded_field_and_identity_registry (test_runtime.ControlTests.test_seeded_field_and_identity_registry) ... ok
+test_shadow_validation (test_runtime.ControlTests.test_shadow_validation) ... ok
+test_site_reserves_full_cooling_authority (test_runtime.ControlTests.test_site_reserves_full_cooling_authority) ... ok
+test_weather_bridge_reuses_domain_functions (test_runtime.ControlTests.test_weather_bridge_reuses_domain_functions) ... ok
+test_fault_reverts_to_conservative_policy (test_runtime.IntegrationTests.test_fault_reverts_to_conservative_policy) ... ok
+test_forecast_failure_uses_local_policy (test_runtime.IntegrationTests.test_forecast_failure_uses_local_policy) ... ok
+test_full_day_comparison_and_constraints (test_runtime.IntegrationTests.test_full_day_comparison_and_constraints) ... ok
+test_governor_budget_blocks_optimized_action (test_runtime.IntegrationTests.test_governor_budget_blocks_optimized_action) ... ok
+test_governs_without_weather_and_handles_compute_only (test_runtime.IntegrationTests.test_governs_without_weather_and_handles_compute_only) ... ok
+test_stale_device_rejects_whole_batch (test_runtime.IntegrationTests.test_stale_device_rejects_whole_batch) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 41.889s
+
+OK

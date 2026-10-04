@@ -1,0 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { DomainCoupler } from './dist/domainCoupler.js';
+import { createInitialWeatherPatternState } from './dist/weatherPatterns/mechanisms.js';
+import { createInitialHurricaneTwinState } from './dist/hurricaneTwin/mechanisms.js';
+const input=JSON.parse(readFileSync(0,'utf8'));
+const pattern=createInitialWeatherPatternState();
+pattern.ambientEnvironmentalShearKts=input.shear_kts;
+pattern.seaSurfaceTempGridC=input.sst_c;
+const twin=createInitialHurricaneTwinState();
+twin.vortexCore.maximumSustainedWindKts=input.wind_kts;
+const result=new DomainCoupler().coupleDomains(pattern,twin);
+console.log(JSON.stringify({mode:'synthetic-weather-coupling',...result.couplingEffect}));

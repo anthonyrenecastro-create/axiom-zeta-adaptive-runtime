@@ -1,0 +1,244 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  PYTHON_VERSION: '3.11'
+  DOCKER_IMAGE: quadra-matrix-ai
+
+jobs:
+  
+  # Code Quality & Testing
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_dashboard.txt
+        pip install torch snntorch datasets transformers networkx scipy scikit-learn matplotlib nltk sympy
+        pip install pytest pytest-cov flake8 black pylint
+    
+    - name: Download NLTK data
+      run: |
+        python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet')"
+    
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=__pycache__,venv,env
+        # Exit-zero treats all errors as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=__pycache__,venv,env
+    
+    - name: Check code formatting with black
+      run: |
+        black --check --diff . --exclude="/(\.git|\.venv|venv|env|__pycache__|\.pytest_cache)/"
+      continue-on-error: true
+    
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=. --cov-report=xml --cov-report=html || true
+      continue-on-error: true
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+
+  # Security Scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+      continue-on-error: true
+    
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+      continue-on-error: true
+
+  # Docker Build & Push
+  docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.event_name == 'push' || github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+      continue-on-error: true
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+      continue-on-error: true
+
+  # Deploy (example for production)
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.event_name == 'release'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Deploy to server
+      run: |
+        echo "Deployment steps would go here"
+        echo "Examples: kubectl apply, docker-compose, SSH deployment, etc."
+      continue-on-error: true
+    
+    # Example: Deploy to Kubernetes
+    # - name: Set up kubectl
+    #   uses: azure/k8s-set-context@v3
+    #   with:
+    #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
+    #
+    # - name: Deploy to Kubernetes
+    #   run: |
+    #     kubectl apply -f k8s/
+    #     kubectl rollout status deployment/quadra-matrix-ai
+
+  # Artifact Management
+  artifacts:
+    name: Upload Artifacts
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.event_name == 'push' || github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Create artifact bundle
+      run: |
+        mkdir -p artifacts
+        tar -czf artifacts/quadra-matrix-source.tar.gz \
+          --exclude='*.pyc' \
+          --exclude='__pycache__' \
+          --exclude='.git' \
+          --exclude='venv' \
+          --exclude='*.pth' \
+          .
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: quadra-matrix-${{ github.sha }}
+        path: artifacts/
+        retention-days: 90
+
+  # Model Training & Validation
+  train:
+    name: Train & Validate Model
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_dashboard.txt
+        pip install torch snntorch datasets transformers networkx scipy scikit-learn matplotlib nltk sympy
+    
+    - name: Download NLTK data
+      run: |
+        python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet')"
+    
+    - name: Run training (quick validation)
+      run: |
+        python train_quadra_matrix.py --num_batches 10 --batch_size 2
+      continue-on-error: true
+    
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: model-artifacts-${{ github.sha }}
+        path: |
+          *.pth
+          training_metrics.json
+          dashboard_state/
+        retention-days: 30
+      continue-on-error: true

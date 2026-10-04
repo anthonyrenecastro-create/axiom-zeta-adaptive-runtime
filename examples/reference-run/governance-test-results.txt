@@ -1,0 +1,19 @@
+✔ governs compute without a weather model or context (7.561072ms)
+✔ objective weights change actual selected action (1.684652ms)
+✔ shared substrate governs two independently modeled domains (1.427785ms)
+✔ core snapshots are recursively immutable (0.61604ms)
+✔ zero compute budget cannot select an action (1.123886ms)
+✔ policy veto disables actions without disabling the substrate (0.857444ms)
+✔ outcomes update reputation, memory and full state hash (1.007891ms)
+✔ failed dispatch assigns blame to contributors (1.677302ms)
+✔ invalid bounds, duplicate candidates and incomplete outcomes reject (1.011436ms)
+✔ export/restore yields deterministic transitions (2.492523ms)
+✔ structural mass transport isolates intentional field updates (0.339713ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.512916

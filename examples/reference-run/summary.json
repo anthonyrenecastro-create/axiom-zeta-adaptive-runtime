@@ -1,0 +1,41 @@
+{
+  "optimized": {
+    "mode": "optimized",
+    "hours": 24.0,
+    "energy_kwh": 47.916332157082195,
+    "cost": 7.483380416158992,
+    "comfort_degree_h": 48.76915613856512,
+    "pump_completed_h": 1.9999999999999978,
+    "deadline_missed": false,
+    "constraint_violations": 0,
+    "forecast_errors": 0,
+    "adaptive_steps": 69,
+    "prediction_mae_kwh": 0.01138640153141244,
+    "backend": "fallback",
+    "data_mode": "synthetic",
+    "weather_enabled": false,
+    "governance_steps": 96,
+    "governance_errors": 0
+  },
+  "baseline": {
+    "mode": "baseline",
+    "hours": 24.0,
+    "energy_kwh": 57.64628688155376,
+    "cost": 9.092857250645222,
+    "comfort_degree_h": 20.807910729448817,
+    "pump_completed_h": 1.9999999999999978,
+    "deadline_missed": false,
+    "constraint_violations": 0,
+    "forecast_errors": 0,
+    "adaptive_steps": 0,
+    "prediction_mae_kwh": 0.008282584621170371,
+    "backend": "fallback",
+    "data_mode": "synthetic",
+    "weather_enabled": false,
+    "governance_steps": 96,
+    "governance_errors": 0
+  },
+  "energy_reduction_percent": 16.878718909448192,
+  "cost_reduction_percent": 17.700452015476465,
+  "comparison": "same synthetic disturbances, limits, deadline; optimized may trade comfort/performance within bounds"
+}

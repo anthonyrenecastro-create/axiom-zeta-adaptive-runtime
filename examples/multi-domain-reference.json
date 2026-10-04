@@ -1,0 +1,212 @@
+{
+  "mode": "modeled-domain-demo",
+  "weather": "absent",
+  "plans": {
+    "compute": {
+      "id": "eco",
+      "feasible": true,
+      "targets": {
+        "cpu_cap": 0.8
+      },
+      "metrics": {
+        "energy": 0.7,
+        "service_loss": 0.1
+      },
+      "predicted_observations": {
+        "utilization": 0.6
+      },
+      "arbitrationScore": 0.6433019999999999,
+      "votes": [
+        {
+          "mechanism": "domain_compute_energy",
+          "preferred": "eco",
+          "weight": 0.71478
+        },
+        {
+          "mechanism": "domain_compute_service_loss",
+          "preferred": "full",
+          "weight": 0.71478
+        }
+      ],
+      "ranking": [
+        {
+          "id": "eco",
+          "score": 0.6433019999999999
+        },
+        {
+          "id": "full",
+          "score": 0.71478
+        }
+      ]
+    },
+    "logistics": {
+      "id": "expedite",
+      "feasible": true,
+      "targets": {
+        "dispatch_rate": 4
+      },
+      "metrics": {
+        "fuel": 0.8,
+        "lateness": 0.05
+      },
+      "predicted_observations": {
+        "queue": 0.4
+      },
+      "arbitrationScore": 0.679041,
+      "votes": [
+        {
+          "mechanism": "domain_logistics_fuel",
+          "preferred": "batch",
+          "weight": 0.71478
+        },
+        {
+          "mechanism": "domain_logistics_lateness",
+          "preferred": "expedite",
+          "weight": 0.71478
+        }
+      ],
+      "ranking": [
+        {
+          "id": "expedite",
+          "score": 0.679041
+        },
+        {
+          "id": "batch",
+          "score": 0.929214
+        }
+      ]
+    }
+  },
+  "consequence": {
+    "predictionError": 0.1369306393762915,
+    "goalProgressDelta": 0.19999999999999998,
+    "resourceCostActual": 117,
+    "unexpectedEventsCount": 0,
+    "causalConfidence": 0.8630693606237085,
+    "creditAssignments": [
+      {
+        "mechanismId": "domain_compute_energy",
+        "predictedBenefit": 0.19,
+        "actualBenefit": 0.4,
+        "confidenceAdjustment": 0.0355,
+        "futurePriority": 0.9420000000000001,
+        "blame": 0,
+        "reward": 0.71
+      },
+      {
+        "mechanismId": "domain_compute_service_loss",
+        "predictedBenefit": 0.19,
+        "actualBenefit": 0.38,
+        "confidenceAdjustment": 0.0295,
+        "futurePriority": 0.918,
+        "blame": 0.09999999999999998,
+        "reward": 0.69
+      },
+      {
+        "mechanismId": "domain_logistics_fuel",
+        "predictedBenefit": 0.19,
+        "actualBenefit": 0.35,
+        "confidenceAdjustment": 0.0205,
+        "futurePriority": 0.882,
+        "blame": 0.24999999999999994,
+        "reward": 0.6599999999999999
+      },
+      {
+        "mechanismId": "domain_logistics_lateness",
+        "predictedBenefit": 0.19,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.032499999999999994,
+        "futurePriority": 0.93,
+        "blame": 0.04999999999999999,
+        "reward": 0.7
+      },
+      {
+        "mechanismId": "mech_diffusion",
+        "predictedBenefit": 0.195,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.03225,
+        "futurePriority": 0.929,
+        "blame": 0.05,
+        "reward": 0.6950000000000001
+      },
+      {
+        "mechanismId": "mech_pred_error",
+        "predictedBenefit": 0.188,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.0326,
+        "futurePriority": 0.9304,
+        "blame": 0.05,
+        "reward": 0.702
+      },
+      {
+        "mechanismId": "mech_stress_reg",
+        "predictedBenefit": 0.192,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.0324,
+        "futurePriority": 0.9296,
+        "blame": 0.05,
+        "reward": 0.698
+      },
+      {
+        "mechanismId": "mech_sensor_fusion",
+        "predictedBenefit": 0.195,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.03225,
+        "futurePriority": 0.929,
+        "blame": 0.05,
+        "reward": 0.6950000000000001
+      },
+      {
+        "mechanismId": "mech_memory",
+        "predictedBenefit": 0.185,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.03275,
+        "futurePriority": 0.931,
+        "blame": 0.05,
+        "reward": 0.7050000000000001
+      },
+      {
+        "mechanismId": "mech_damage_repair",
+        "predictedBenefit": 0.195,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.03225,
+        "futurePriority": 0.929,
+        "blame": 0.05,
+        "reward": 0.6950000000000001
+      },
+      {
+        "mechanismId": "mech_geometry_adapt",
+        "predictedBenefit": 0.18200000000000002,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.0329,
+        "futurePriority": 0.9316,
+        "blame": 0.05,
+        "reward": 0.708
+      },
+      {
+        "mechanismId": "mech_resource",
+        "predictedBenefit": 0.198,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.0321,
+        "futurePriority": 0.9284,
+        "blame": 0.05,
+        "reward": 0.692
+      },
+      {
+        "mechanismId": "mech_curiosity",
+        "predictedBenefit": 0.19,
+        "actualBenefit": 0.39,
+        "confidenceAdjustment": 0.032499999999999994,
+        "futurePriority": 0.93,
+        "blame": 0.05,
+        "reward": 0.7
+      }
+    ]
+  },
+  "memory": {
+    "working": 1,
+    "episodic": 4,
+    "semantic": 1,
+    "procedural": 1
+  }
+}

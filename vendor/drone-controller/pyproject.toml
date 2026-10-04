@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "cmake>=3.15", "pybind11>=2.6"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quadra-kernel"
+version = "1.0.0"
+description = "Quadra Matrix SNN Kernel for Drone Controllers"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "GPL-2.0"}
+authors = [
+    {name = "Quadra Matrix Team", email = "dev@quadramatrix.ai"}
+]
+keywords = ["snn", "neural-network", "drone", "kernel", "real-time", "embedded"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+]
+
+dependencies = [
+    "numpy>=1.19.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+]
+examples = [
+    "matplotlib",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://github.com/anthonycastro-spaceace01/stunning-tribble-starborn-888-snn-green-kernal"
+Documentation = "https://github.com/anthonycastro-spaceace01/stunning-tribble-starborn-888-snn-green-kernal/wiki"
+Repository = "https://github.com/anthonycastro-spaceace01/stunning-tribble-starborn-888-snn-green-kernal"
+Issues = "https://github.com/anthonycastro-spaceace01/stunning-tribble-starborn-888-snn-green-kernal/issues"
+
+[tool.setuptools]
+packages = ["quadra_kernel"]
+package-dir = {"" = "kernel"}
+
+[tool.black]
+line-length = 100
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=quadra_kernel --cov-report=html --cov-report=term"

@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quadra-matrix-ai
+  labels:
+    app: quadra-matrix-ai
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quadra-matrix-ai
+  template:
+    metadata:
+      labels:
+        app: quadra-matrix-ai
+        version: v1
+    spec:
+      containers:
+      - name: quadra-matrix
+        image: quadra-matrix-ai:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+          name: http
+          protocol: TCP
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: MODEL_ARTIFACTS_DIR
+          value: "/app/models"
+        - name: DASHBOARD_STATE_DIR
+          value: "/app/dashboard_state"
+        - name: FIELD_SIZE
+          value: "100"
+        - name: NUM_BATCHES
+          value: "100"
+        - name: BATCH_SIZE
+          value: "5"
+        volumeMounts:
+        - name: model-storage
+          mountPath: /app/models
+        - name: state-storage
+          mountPath: /app/dashboard_state
+        - name: logs-storage
+          mountPath: /app/logs
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: quadra-models-pvc
+      - name: state-storage
+        persistentVolumeClaim:
+          claimName: quadra-state-pvc
+      - name: logs-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quadra-matrix-ai-service
+  labels:
+    app: quadra-matrix-ai
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 5000
+    protocol: TCP
+    name: http
+  selector:
+    app: quadra-matrix-ai
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: quadra-models-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: quadra-state-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

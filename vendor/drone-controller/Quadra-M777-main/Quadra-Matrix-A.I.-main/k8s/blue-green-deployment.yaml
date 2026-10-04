@@ -1,0 +1,185 @@
+# Blue-Green Deployment Configuration for Kubernetes
+
+# Service pointing to active deployment (Blue or Green)
+apiVersion: v1
+kind: Service
+metadata:
+  name: quadra-matrix-production
+  labels:
+    app: quadra-matrix
+spec:
+  selector:
+    app: quadra-matrix
+    deployment: blue  # Switch between 'blue' and 'green'
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
+
+---
+# Blue Deployment (Currently Active)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quadra-matrix-blue
+  labels:
+    app: quadra-matrix
+    deployment: blue
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: quadra-matrix
+      deployment: blue
+  template:
+    metadata:
+      labels:
+        app: quadra-matrix
+        deployment: blue
+        version: "1.0.0"
+    spec:
+      containers:
+      - name: quadra-matrix
+        image: quadra-matrix:1.0.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: DEPLOYMENT_TYPE
+          value: "blue"
+        - name: VERSION
+          value: "1.0.0"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Green Deployment (Staged, Not Active)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quadra-matrix-green
+  labels:
+    app: quadra-matrix
+    deployment: green
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: quadra-matrix
+      deployment: green
+  template:
+    metadata:
+      labels:
+        app: quadra-matrix
+        deployment: green
+        version: "1.1.0"
+    spec:
+      containers:
+      - name: quadra-matrix
+        image: quadra-matrix:1.1.0  # New version
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: DEPLOYMENT_TYPE
+          value: "green"
+        - name: VERSION
+          value: "1.1.0"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Internal Service for Blue (testing)
+apiVersion: v1
+kind: Service
+metadata:
+  name: quadra-matrix-blue
+  labels:
+    app: quadra-matrix
+    deployment: blue
+spec:
+  selector:
+    app: quadra-matrix
+    deployment: blue
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: ClusterIP
+
+---
+# Internal Service for Green (testing)
+apiVersion: v1
+kind: Service
+metadata:
+  name: quadra-matrix-green
+  labels:
+    app: quadra-matrix
+    deployment: green
+spec:
+  selector:
+    app: quadra-matrix
+    deployment: green
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: ClusterIP
+
+---
+# Ingress for routing (optional, for advanced routing)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: quadra-matrix-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: quadra-matrix.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: quadra-matrix-production
+            port:
+              number: 80

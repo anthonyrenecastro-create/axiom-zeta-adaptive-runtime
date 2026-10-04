@@ -1,0 +1,168 @@
+# Canary Deployment Configuration for Kubernetes
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: quadra-matrix-service
+  labels:
+    app: quadra-matrix
+spec:
+  selector:
+    app: quadra-matrix
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
+
+---
+# Stable Deployment (90% traffic)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quadra-matrix-stable
+  labels:
+    app: quadra-matrix
+    version: stable
+spec:
+  replicas: 9  # 90% of traffic
+  selector:
+    matchLabels:
+      app: quadra-matrix
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: quadra-matrix
+        version: stable
+    spec:
+      containers:
+      - name: quadra-matrix
+        image: quadra-matrix:1.0.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: VERSION
+          value: "stable"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Canary Deployment (10% traffic)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quadra-matrix-canary
+  labels:
+    app: quadra-matrix
+    version: canary
+spec:
+  replicas: 1  # 10% of traffic
+  selector:
+    matchLabels:
+      app: quadra-matrix
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: quadra-matrix
+        version: canary
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: quadra-matrix
+        image: quadra-matrix:1.1.0-canary  # New version
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: VERSION
+          value: "canary"
+        - name: CANARY_DEPLOYMENT
+          value: "true"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Horizontal Pod Autoscaler for Stable
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: quadra-matrix-stable-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: quadra-matrix-stable
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# ServiceMonitor for Prometheus (if using Prometheus Operator)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: quadra-matrix-monitor
+  labels:
+    app: quadra-matrix
+spec:
+  selector:
+    matchLabels:
+      app: quadra-matrix
+  endpoints:
+  - port: web
+    path: /metrics
+    interval: 30s

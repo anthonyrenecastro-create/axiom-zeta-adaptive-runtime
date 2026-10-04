@@ -1,0 +1,72 @@
+# Dependency Scanning Configuration
+
+# GitHub Dependabot configuration for automated dependency updates and security scanning
+
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    
+    # Security updates
+    open-pull-requests-limit: 10
+    
+    # Versioning strategy
+    versioning-strategy: increase
+    
+    # Reviewers and assignees
+    reviewers:
+      - "anthonycastro-spaceace01"
+    
+    # Labels for pull requests
+    labels:
+      - "dependencies"
+      - "security"
+      - "automated"
+    
+    # Commit message prefix
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    
+    # Allow updates for direct and indirect dependencies
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    
+    # Ignore specific dependencies
+    ignore:
+      # Ignore major version updates for stable packages
+      - dependency-name: "torch"
+        update-types: ["version-update:semver-major"]
+    
+    # Rebase strategy
+    rebase-strategy: "auto"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci/cd"
